@@ -38,22 +38,41 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         String imageBase64 = product.getImageBase64();
 
         if (imageBase64 != null && !imageBase64.isEmpty()) {
-            // If the Base64 string starts with "data:image/jpeg", remove it
-            if (imageBase64.startsWith("data:image")) {
-                imageBase64 = imageBase64.substring(imageBase64.indexOf(",") + 1);
+            try {
+                // If the Base64 string starts with "data:image", remove it
+                if (imageBase64.startsWith("data:image")) {
+                    imageBase64 = imageBase64.substring(imageBase64.indexOf(",") + 1);
+                }
+
+                // Decode Base64 string to byte array
+                byte[] decodedString = Base64.decode(imageBase64, Base64.DEFAULT);
+
+                // Convert byte array to Bitmap
+                Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+
+                // Set the Bitmap to ImageView if it's not null
+                if (decodedByte != null) {
+                    holder.productImage.setImageBitmap(decodedByte);
+                } else {
+                    Log.e("ProductAdapter", "Decoded image is null");
+                }
+            } catch (IllegalArgumentException e) {
+                Log.e("ProductAdapter", "Base64 decoding error: " + e.getMessage());
             }
-
-            // Decode Base64 string to byte array
-            byte[] decodedString = Base64.decode(imageBase64, Base64.DEFAULT);
-
-            // Convert byte array to Bitmap
-            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-
-            // Set the Bitmap to ImageView if it's not null
-            if (decodedByte != null) {
-                holder.productImage.setImageBitmap(decodedByte);
-            }
+        } else {
+            Log.e("ProductAdapter", "Image Base64 string is empty or null");
         }
+
+        // Declare a final variable for the final imageBase64 value
+        final String finalImageBase64 = imageBase64;
+
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(v.getContext(), ProductDetailActivity.class);
+            intent.putExtra("PRODUCT_NAME", product.getName());
+            intent.putExtra("PRODUCT_PRICE", product.getPrice());
+            intent.putExtra("PRODUCT_IMAGE", finalImageBase64);  // Use the final variable here
+            v.getContext().startActivity(intent);
+        });
     }
 
 

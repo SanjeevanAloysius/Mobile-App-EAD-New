@@ -1,6 +1,6 @@
 package com.example.ecommerceapp;
 
-import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -39,12 +39,11 @@ public class ProductListActivity extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.recyclerView);
         productList = new ArrayList<>();
-        productAdapter = new ProductAdapter(productList);
+        productAdapter = new ProductAdapter(productList); // Pass the activity context
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(productAdapter);
 
         fetchProducts();
-        Log.d("productList", productList.toString());
     }
 
     private void fetchProducts() {
@@ -59,9 +58,9 @@ public class ProductListActivity extends AppCompatActivity {
                                 JSONObject product = response.getJSONObject(i);
                                 String productName = product.getString("name");
                                 double price = product.getDouble("price");
-                                String imageBase64 = product.getString("productPicture"); // Assuming this is the field name
+                                String imageBase64 = product.getString("productPicture");
 
-                                productList.add(new Product(productName,"Rs. " + price + "0", imageBase64));
+                                productList.add(new Product(productName, "Rs. " + price + "0", imageBase64));
                             }
                             productAdapter.notifyDataSetChanged();
                         } catch (JSONException e) {
@@ -96,7 +95,7 @@ public class ProductListActivity extends AppCompatActivity {
             public Map<String, String> getHeaders() throws AuthFailureError {
                 SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREF_NAME, MODE_PRIVATE);
                 String token = sharedPreferences.getString(TOKEN_KEY, "");
-                Log.d(TAG, "Using token: " + token);  // Log the token to check if it's being retrieved correctly
+                Log.d(TAG, "Using token: " + token);
                 Map<String, String> headers = new HashMap<>();
                 headers.put("Authorization", "Bearer " + token);
                 return headers;
