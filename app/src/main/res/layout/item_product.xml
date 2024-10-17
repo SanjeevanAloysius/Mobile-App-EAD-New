@@ -17,9 +17,8 @@
             android:id="@+id/productImage"
             android:layout_width="match_parent"
             android:layout_height="100dp"
-        android:contentDescription="@string/product_image_description"
-        android:scaleType="centerCrop"
-        android:src="@drawable/ic_product_placeholder" />
+            android:contentDescription="@string/product_image_description"
+            android:scaleType="centerCrop" />
 
         <TextView
             android:id="@+id/productName"

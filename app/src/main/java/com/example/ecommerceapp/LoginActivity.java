@@ -2,24 +2,35 @@ package com.example.ecommerceapp;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.UnderlineSpan;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import android.content.SharedPreferences;
 
 public class LoginActivity extends AppCompatActivity {
 
     private EditText emailEditText, passwordEditText;
-    private Button loginButton, signupButton;
+    private Button loginButton;
+    private TextView signupButton;
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,10 +39,21 @@ public class LoginActivity extends AppCompatActivity {
 
         emailEditText = findViewById(R.id.loginEmail);
         passwordEditText = findViewById(R.id.loginPassword);
-        loginButton = findViewById(R.id.loginButton);
-        signupButton = findViewById(R.id.signupButton);
+        loginButton = findViewById(R.id.btnLogin);
+        signupButton = findViewById(R.id.signupLink);
 
-        // Login button click listener
+        // Initialize SharedPreferences
+        sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
+
+        String signupText = "Don't have an account? Create an Account";
+        SpannableString spannableString = new SpannableString(signupText);
+        int start = signupText.indexOf("Create an Account");
+        int end = start + "Create an Account".length();
+
+        spannableString.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.accentColor)), start, end, 0);
+        spannableString.setSpan(new UnderlineSpan(), start, end, 0);
+        signupButton.setText(spannableString);
+
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -46,7 +68,6 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        // Signup button click listener
         signupButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -56,13 +77,11 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    // Function to handle login with Volley sending application/json
     private void loginUser(String email, String password) {
-        String url = "http://10.0.2.2:5296/api/Auth/login";  // Replace with your API URL
+        String url = "http://10.0.2.2:5296/api/Auth/login";
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        // Create JSON object to hold email and password
         JSONObject jsonBody = new JSONObject();
         try {
             jsonBody.put("email", email);
@@ -71,24 +90,35 @@ public class LoginActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        // Create JsonObjectRequest with POST method
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, jsonBody,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         System.out.println(response);
                         try {
-                            //boolean success = response.getBoolean("success");
                             String message = response.getString("message");
 
                             if (message.equals("Login successful")) {
-                                // On successful login
+                                // Save the response data to SharedPreferences
+                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                // Assuming the response has a token and userId, save them
+                                String token = response.getString("token");
+                                String userString = response.getString("user");
+                                JSONObject userObject = new JSONObject(userString);
+
+                                // Now you can access the values in the userObject
+
+                                String userEmail = userObject.getString("email");
+//
+                                editor.putString("token", token);
+                                editor.putString("userEmail", userEmail);
+                                editor.apply();  // Save data asynchronously
+
                                 Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
                                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                                 startActivity(intent);
                                 finish();
                             } else {
-                                // On login failure
                                 Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
                             }
                         } catch (JSONException e) {
@@ -106,11 +136,10 @@ public class LoginActivity extends AppCompatActivity {
         ) {
             @Override
             public String getBodyContentType() {
-                return "application/json";  // Set content type to application/json
+                return "application/json";
             }
         };
 
-        // Add request to queue
         requestQueue.add(jsonObjectRequest);
     }
 }
