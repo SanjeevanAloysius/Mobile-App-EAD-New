@@ -34,8 +34,8 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         Product product = productList.get(position);
         holder.productName.setText(product.getName());
         holder.productPrice.setText(product.getPrice());
-
         String imageBase64 = product.getImageBase64();
+        String id = product.getId();
 
         if (imageBase64 != null && !imageBase64.isEmpty()) {
             try {
@@ -70,11 +70,11 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             Intent intent = new Intent(v.getContext(), ProductDetailActivity.class);
             intent.putExtra("PRODUCT_NAME", product.getName());
             intent.putExtra("PRODUCT_PRICE", product.getPrice());
-            intent.putExtra("PRODUCT_IMAGE", finalImageBase64);  // Use the final variable here
+            intent.putExtra("PRODUCT_IMAGE", finalImageBase64);
+            intent.putExtra("PRODUCT_ID", id);// Use the final variable here
             v.getContext().startActivity(intent);
         });
     }
-
 
     @Override
     public int getItemCount() {

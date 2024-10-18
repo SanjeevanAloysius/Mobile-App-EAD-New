@@ -54,13 +54,15 @@ public class ProductListActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(JSONArray response) {
                         try {
+                            Log.d("productList" , response.toString());
                             for (int i = 0; i < response.length(); i++) {
                                 JSONObject product = response.getJSONObject(i);
                                 String productName = product.getString("name");
+                                String id = product.getString("id");
                                 double price = product.getDouble("price");
                                 String imageBase64 = product.getString("productPicture");
 
-                                productList.add(new Product(productName, "Rs. " + price + "0", imageBase64));
+                                productList.add(new Product(id , productName, "Rs. " + price + "0", imageBase64));
                             }
                             productAdapter.notifyDataSetChanged();
                         } catch (JSONException e) {
